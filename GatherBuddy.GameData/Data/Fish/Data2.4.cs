@@ -85,7 +85,7 @@ public static partial class Fish
         data.Apply     (8767, Patch.DreamsOfIce) // Wootz Knifefish Zenith
             .Mooch     (data, 2599, 4978)
             .Bite      (data, HookSet.Powerful, BiteType.Legendary)
-            .Time      (60, 200)
+            .Time      (60, 240)
             .Transition(data, 1, 2)
             .Weather   (data, 4);
         data.Apply     (8768, Patch.DreamsOfIce) // Helicoprion
