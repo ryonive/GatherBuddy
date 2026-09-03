@@ -16,8 +16,9 @@ namespace GatherBuddy.FishTimer;
 
 public partial class FishRecorder
 {
-    public const int DeadLureTiming    = 5000;
-    public const int InvalidLureTiming = DeadLureTiming + 500;
+    public delegate void RecordCreatedDelegate(in FishRecord record);
+    public const    int  DeadLureTiming    = 5000;
+    public const    int  InvalidLureTiming = DeadLureTiming + 500;
 
     [Flags]
     internal enum CatchSteps
@@ -32,13 +33,14 @@ public partial class FishRecorder
         NoMoreHook     = 0x40,
     }
 
-    public readonly   FishingParser Parser;
-    internal          CatchSteps    Step      = 0;
-    internal          FishingState  LastState = FishingState.None;
-    internal readonly Stopwatch     Timer     = new();
-    internal readonly Stopwatch     LureTimer = new();
-    private           byte          _currentLureStack;
-    public event System.Action      UsedLure;
+    public readonly   FishingParser     Parser;
+    internal          CatchSteps        Step      = 0;
+    internal          FishingState      LastState = FishingState.None;
+    internal readonly Stopwatch         Timer     = new();
+    internal readonly Stopwatch         LureTimer = new();
+    private           byte              _currentLureStack;
+    public event System.Action          UsedLure;
+    public event RecordCreatedDelegate? RecordCreated;
 
     public Fish? LastCatch;
 
@@ -65,7 +67,7 @@ public partial class FishRecorder
 
     private void CheckBuffs()
     {
-        if (Dalamud.Objects.LocalPlayer?.StatusList is not {} statusList)
+        if (Dalamud.Objects.LocalPlayer?.StatusList is not { } statusList)
             return;
 
         foreach (var buff in statusList)
@@ -147,7 +149,7 @@ public partial class FishRecorder
     private void Reset()
     {
         LastCatch = Record.Catch ?? LastCatch;
-        Record = new FishRecord()
+        Record = new FishRecord
         {
             Flags = FishRecord.Effects.Valid,
         };
@@ -261,6 +263,7 @@ public partial class FishRecorder
         Step = CatchSteps.None;
         if (GatherBuddy.Config.StoreFishRecords)
             Add(Record);
+        RecordCreated?.Invoke(Record);
     }
 
     private void OnFrameworkUpdate(IFramework _)
@@ -280,9 +283,7 @@ public partial class FishRecorder
             case FishingState.Quitting:
                 OnFishingStop();
                 break;
-            case FishingState.PullingPoleIn:
-                Step |= CatchSteps.NoMoreHook;
-                break;
+            case FishingState.PullingPoleIn: Step |= CatchSteps.NoMoreHook; break;
         }
     }
 

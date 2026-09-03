@@ -287,7 +287,7 @@ public partial class Interface
                 Data.IsBigFish        ? "Big Fish" : "Regular Fish";
 
             Time = !Data.FishRestrictions.HasFlag(FishRestrictions.Time)
-                ? "Always Up"
+                ? "No Time Restrictions"
                 : Data.OceanFish
                     ? PrintOceanTime(Data.OceanTime)
                     : Data.Interval.AlwaysUp()
