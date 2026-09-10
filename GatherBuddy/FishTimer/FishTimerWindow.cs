@@ -221,7 +221,8 @@ public partial class FishTimerWindow : Window, IDisposable
         }
         else
         {
-            var enumerator = _spot.Items.Select(f => new FishCache(_recorder, f, _spot));
+            var cache      = _spot.Items.Select(f => new FishCache(_recorder, f, _spot)).ToArray();
+            var enumerator = cache.AsEnumerable();
             if (GatherBuddy.Config.HideUnavailableFish)
                 enumerator = enumerator.Where(f => !f.Unavailable);
             if (GatherBuddy.Config.HideUncaughtFish)
@@ -229,7 +230,7 @@ public partial class FishTimerWindow : Window, IDisposable
             _availableFish = enumerator.OrderBy(f => f.SortOrder).ToArray();
 
             var currentTime = GatherBuddy.Time.ServerTime;
-            _nextUptimeChange = _availableFish.Min(f => f.NextUptime.Start < currentTime ? f.NextUptime.End : f.NextUptime.Start);
+            _nextUptimeChange = cache.Length is 0 ? TimeStamp.MaxValue : cache.Min(f => f.NextUptime.Start < currentTime ? f.NextUptime.End : f.NextUptime.Start);
         }
     }
 
